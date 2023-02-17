@@ -53,27 +53,27 @@ namespace Front
 
                     // This part makes all 4 grids around to be dilated  
                     if (i > 0) {
-                        dilated_grid[i - 1][j] = 1;
+                        dilated_grid[i - 1][j] = 100;
                     }
                     if (i < rows - 1) {
-                        dilated_grid[i + 1][j] = 1;
+                        dilated_grid[i + 1][j] = 100;
                     }
                     if (j > 0) {
-                        dilated_grid[i][j - 1] = 1;
+                        dilated_grid[i][j - 1] = 100;
                     }
                     if (j < columns - 1) {
-                        dilated_grid[i][j + 1] = 1;
+                        dilated_grid[i][j + 1] = 100;
                     }
                 }
             }
         }
         // test for output of dilated map
-        for (auto row : dilated_grid) {
-            for (int cell : row) {
-                std::cout << cell << " ";
-            }
-            std::cout << std::endl;
-        }
+        // for (auto row : dilated_grid) {
+        //     for (int cell : row) {
+        //         std::cout << cell << " ";
+        //     }
+        //     std::cout << std::endl;
+        // }
         return dilated_grid;
     }
 
@@ -121,7 +121,7 @@ namespace Front
     private:
         std::vector<std::vector<int>> binaryMatrix_;
         int droneX_, droneY_;
-        const int DilationRadius_ = 1;
+        const int DilationRadius_ = 2;
     };
 }
 #endif
