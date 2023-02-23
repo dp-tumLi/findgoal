@@ -53,22 +53,77 @@ public:
     std::vector<std::pair<int, int>> path;
     int x = goalX;
     int y = goalY;
-    while (x != startX || y != startY) {
+    
+    // test for what if goal not found
+    std::cout<<"Planned Goal X: "<<previous[x][y].first<<" Planned Goal Y: "<<previous[x][y].second<<std::endl;
+
+    auto Second_last = previous[x][y];
+    if (abs(Second_last.first-goalX)<3 && abs(Second_last.second-goalY)<3)
+    {
+      while (x != startX || y != startY) {
       path.push_back({x, y});
       auto prev = previous[x][y];
       x = prev.first;
       y = prev.second;
+      }
+      path.push_back({startX, startY});
+      // Reverse the path to start from the start position
+      std::reverse(path.begin(), path.end());
     }
-    path.push_back({startX, startY});
-
-    // Reverse the path to start from the start position
-    std::reverse(path.begin(), path.end());
-
+  
     return path;
+  } 
+
+
+  bool VerifyPath(std::vector<std::pair<int, int>> found_path){
+    if (found_path.size()!=0){
+      std::cout<<"find a path!!"<<std::endl;
+
+      return false;
+    }
+    else{
+      std::cout<<"not such a path found!!"<<std::endl;
+
+      return true;
+    }
   }
+  
+  bool VerifyStart(int StartX, int StartY){
+    if (map_[StartX][StartY] != -1 && map_[StartX][StartY] != 0 ){
+      std::cout<<"Your initial position is invalid!!"<<std::endl;
+      std::cout<<"With Value"<<map_[StartX][StartY]<<std::endl;
+
+      return false;
+    }
+    else{
+      std::cout<<"You current at a safe place!!"<<std::endl;
+
+      return true;
+    }
+
+  }
+
+  bool CheckIfPathCollision(std::vector<std::pair<int, int>> path,
+  const std::vector<std::vector<int>>& map) {
+    for (const auto& eachptr: path){
+      std::cout<<"map grid value: "<<map[eachptr.first][eachptr.second]<<std::endl;
+      if (map[eachptr.first][eachptr.second] == 100){
+        std::cout<<eachptr.first<<","<<eachptr.second<<" has ONE collision!"<<std::endl;
+
+        return false;
+      }
+      else{
+        std::cout<<"we have NOT detected collision!"<<std::endl;
+        
+        return true;
+      }
+    }
+  };
 
 private:
   const std::vector<std::vector<int>>& map_;
   int m_;
   int n_;
+
+
 };

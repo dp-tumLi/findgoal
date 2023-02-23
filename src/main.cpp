@@ -6,31 +6,32 @@
 #include <vector>
 #include <cstring>
 using namespace Front;
+void writeMatrixToCsvFile(const std::vector<std::vector<int>>& matrix, const std::string& filename);
 
 int main(int argc, char *argv[])
 {
-	// 	std::vector<std::vector<int>> binaryMatrix = {{0, 0, 0, 0, 1, 1, -1, -1, -1, -1},
-	// 												  {0, 0, 0, 0, 1, 1, -1, -1, -1, -1},
-	// 													{0, 0, 0, 0, 1, 1, -1, -1, -1, -1},
-	// 													{0, 0, 0, 0, 0, 1, -1, -1, -1, -1},
-	// 													{1, 0, 0, 0, 0, 0, -1, -1, -1, -1},
-	// 													{1, 1, 1, 0, 0, 0, -1, -1, -1, -1},
-	// 													{-1, -1, 1, 0, 0, 0, -1, -1, -1, -1},
-	// 													{-1, -1, 0, 0, 1, 1, -1, -1, -1, -1},
-	// 													};
+	// std::vector<std::vector<int>> binaryMatrix = {{0, 0, 0, 100, 100, 100, -1, -1, -1, -1},
+	// 											{0, 0, 0, 0, 0, 100, -1, -1, -1, -1},
+	// 											{0, 0, 0, 0, 0, 100, -1, -1, -1, -1},
+	// 											{100, 0, 0, 0, 0, 0, -1, -1, -1, -1},
+	// 											{100, 100, 0, 0, 0, 0, -1, -1, -1, -1},
+	// 											{100, 100, 0, 0, 0, 0, -1, -1, -1, -1},
+	// 											{-1, -1, 100, 100, 0, 100, -1, -1, -1, -1},
+	// 											{-1, -1, 0, 0, 100, 100, -1, -1, -1, -1},
+	// 											};
+				
 
 	std::ifstream mymap;
-	std::string filename = "map1.txt";
+	std::string filename = "map_res0.5.txt";
 	mymap.open(filename.c_str());
 
-	const int height = 135;
-	const int width = 196;
+	const int height = 42;
+	const int width = 49;
 	int num = -1;
 	std::vector<int> vec;
 
 	if (mymap.is_open())
 	{
-		std::cout << " in " << std::endl;
 		char c;
 		while (mymap.get(c))
 		{
@@ -61,46 +62,58 @@ int main(int argc, char *argv[])
 			matrix[i][j] = vec[i * width + j];
 		}
 	}
-
-	// auto data = std::make_unique<std::vector<int>>(height * width);
-
-	// // Fill the vector with data
-	// for (int i = 0; i < height; i++) {
-	// 	for (int j = 0; j < width; j++) {
-	// 		(*data)[i * width + j] = vec[i * width + j];
-	// 	}
-	// }
-
-	// std::vector<std::vector<int>> matrix;
-	// matrix.reserve(height);
-	// for (int i = 0; i < height; i++) {
-	// 	matrix.emplace_back(data.get() + i * width, data.get() + (i + 1) * width);
-	// }
-
-	// std::cout<<matrix[0].size()<<matrix.size()<<std::endl;
+	
+    writeMatrixToCsvFile(matrix, "matrix.csv");
 
 	auto binaryMatrix = matrix;
 
-	int droneX = 1, droneY = 138;
+	// from now on
+
+	// for (int i = 0; i < binaryMatrix.size(); i++) {
+	// 	for (int j = 0; j < binaryMatrix[i].size(); j++) {
+	// 	std::cout << binaryMatrix[i][j] << "   ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
+	int droneX = 8, droneY = 16;
 
 	FrontGoal goal(binaryMatrix, droneX, droneY);
 
-	// goal.DilateObstacle(2);
+	const int radius = 0;
+	auto map_processed = goal.DilateObstacle(radius);
+	// auto next_goal = goal.findGoal2(map_processed);
+	auto next_goal = goal.findGoal4(map_processed, droneX, droneY);
 
-	auto next_goal = goal.findGoal();
 
-	std::cout << "x: " << next_goal.x << " y: " << next_goal.y << " p: " << next_goal.priority << std::endl;
+	writeMatrixToCsvFile(map_processed, "matrix1.csv");
+
+	// for (auto row : map_processed) {
+	// 	for (int cell : row) {
+	// 		std::cout << cell << "    ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
+	std::cout << "x: " << next_goal.x + 1<< " y: " << next_goal.y + 1<< " p: " << next_goal.priority << std::endl;
 
 	auto goalX = next_goal.x;
 	auto goalY = next_goal.y;
+	// auto goalX = 74;
+	// auto goalY = 0;
+	Dijkstra Dijkstra(map_processed);
 
-	Dijkstra Dijkstra(binaryMatrix);
+	Dijkstra.VerifyStart(droneX, droneY);
 
 	std::vector<std::pair<int, int>> path = Dijkstra.findShortestPath(droneX, droneY, goalX, goalY);
+	
+	Dijkstra.VerifyPath(path);
+
+	Dijkstra.CheckIfPathCollision(path, map_processed);
 
 	for (auto wayptr : path)
 	{
-		std::cout << " x " << wayptr.first << " y " << wayptr.second << std::endl;
+		std::cout << " x " << wayptr.first+1 << " y " << wayptr.second+1 << std::endl;
 	}
 
 	const int dimension = 3;
@@ -119,7 +132,7 @@ int main(int argc, char *argv[])
 	int count_tmp = 0;
 	for (auto vel : vel_waypt){
 		for (auto a : vel){
-			std::cout<<a<<std::endl;
+			// std::cout<<a<<std::endl;
 			count_tmp ++;
 		}
 	}
@@ -131,4 +144,24 @@ int main(int argc, char *argv[])
 	// }
 
 	return 0;
+}
+
+void writeMatrixToCsvFile(const std::vector<std::vector<int>>& matrix, const std::string& filename)
+{
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        for (const auto& row : matrix) {
+            for (size_t i = 0; i < row.size(); i++) {
+                file << row[i];
+                if (i != row.size() - 1) {
+                    file << ",";
+                }
+            }
+            file << "\n";
+        }
+        file.close();
+    }
+    else {
+        std::cerr << "Unable to open file: " << filename << std::endl;
+    }
 }
